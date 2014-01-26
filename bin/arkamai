@@ -1,0 +1,91 @@
+#!/usr/bin/env ruby
+
+# arkamai - A small command line akamai toolkit
+#
+# Author:: Martin Ramos Mejia (<ramosmejiamartin@gmail.com>)
+
+require 'choice'
+require 'arkamai'
+include Arkamai::Commands
+
+Choice.options do
+  header "fight the CDN with some arkamai awesomeness"
+  header "Specific options:"
+
+  option :url, :required => false do
+    short '-u'
+    long  '--url'
+    desc  'url to inspect with arkamai'
+  end
+
+  option :urlfile, :required => false do
+    short '-f'
+    long  '--file=PATH_FILE_WITH_URLS'
+    desc  'file containing urls to be inspected with arkamai'
+  end
+
+  option :cache_key_check, :required => false do
+    short '-kc'
+    long  '--cache_key_check'
+    desc  'verifies if the cache key corresponds with the digital property of the url'
+  end
+
+  option :info, :required => false do
+    short '-i'
+    long  '--info'
+    desc  'show all the akamai related information to that url'
+  end
+
+  option :cacheable, :required => false do
+    short '-c'
+    long  '--cacheable'
+    desc  'show if the url is cacheable on the akamai edge'
+  end
+
+  option :cache_hit, :required => false do
+    short '-ch'
+    long  '--cache_hit'
+    desc  'verifies if the cache is hitted on that url'
+  end
+
+  option :help do
+    short '-h'
+    long  '--help'
+    desc  'Show this message'
+  end
+end
+
+if Choice.choices[:url]
+  @urls = [Choice.choices[:url]]
+elsif  Choice.choices[:urlfile]
+  urlfile = Choice.choices[:urlfile]
+  if File.exists?(urlfile)
+    @urls = File.open(urlfile, 'r').readlines
+  else
+    puts "Error: #{urlfile} doesn't exist."
+    exit 1
+  end
+end
+
+if Choice.choices[:cache_key_check]
+  cache_key_check(@urls)
+  exit 0
+end
+
+if Choice.choices[:info]
+  info(@urls)
+  exit 0
+end
+
+if Choice.choices[:cacheable]
+  cacheable?(@urls)
+  exit 0
+end
+
+if Choice.choices[:cache_hit]
+  cache_hit?(@urls)
+  exit 0
+end
+
+Choice.help
+
